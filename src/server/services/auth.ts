@@ -49,24 +49,57 @@ const sessionCookieOptions = (): CookieOptions => ({
 export const getSessionCookieOptions = sessionCookieOptions;
 
 export const ensureDefaultAdmin = () => {
-  const existing = db
-    .prepare('SELECT COUNT(*) as count FROM users')
-    .get() as { count: number };
-  if (existing.count > 0) {
+  const username = config.defaultAdminUsername.trim() || 'admin';
+  const password = config.defaultAdminPassword || 'admin123456';
+  const now = formatDateTime(dayjs());
+  const users = db
+    .prepare(
+      'SELECT id, username, password_hash, nickname, must_change_password FROM users ORDER BY id ASC'
+    )
+    .all() as UserRow[];
+
+  if (!users.length) {
+    const hash = bcrypt.hashSync(password, 12);
+    db.prepare(
+      `INSERT INTO users (
+        username,
+        password_hash,
+        nickname,
+        must_change_password,
+        created_at,
+        updated_at
+      ) VALUES (?, ?, ?, 0, ?, ?)`
+    ).run(username, hash, '管理员', now, now);
     return;
   }
-  const now = formatDateTime(dayjs());
-  const hash = bcrypt.hashSync(config.defaultAdminPassword, 12);
+
+  const admin = users[0];
+  const usernameTaken = users.some(
+    (user) => user.id !== admin.id && user.username === username
+  );
+  if (usernameTaken) {
+    throw new Error(`环境变量 DEFAULT_ADMIN_USERNAME=${username} 已被其他账号占用`);
+  }
+
+  const usernameChanged = admin.username !== username;
+  const passwordChanged = !bcrypt.compareSync(password, admin.password_hash);
+  const mustChangeFlagChanged = Boolean(admin.must_change_password);
+  if (!usernameChanged && !passwordChanged && !mustChangeFlagChanged) {
+    return;
+  }
+
+  const nextPasswordHash = passwordChanged
+    ? bcrypt.hashSync(password, 12)
+    : admin.password_hash;
   db.prepare(
-    `INSERT INTO users (
-      username,
-      password_hash,
-      nickname,
-      must_change_password,
-      created_at,
-      updated_at
-    ) VALUES (?, ?, ?, 1, ?, ?)`
-  ).run(config.defaultAdminUsername, hash, '管理员', now, now);
+    `UPDATE users
+     SET username = ?, password_hash = ?, must_change_password = 0, updated_at = ?
+     WHERE id = ?`
+  ).run(username, nextPasswordHash, now, admin.id);
+
+  if (usernameChanged || passwordChanged) {
+    db.prepare('DELETE FROM sessions WHERE user_id = ?').run(admin.id);
+  }
 };
 
 const createSession = (userId: number) => {
@@ -149,27 +182,4 @@ export const logout = (rawToken?: string | null) => {
     return;
   }
   db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(sha256(rawToken));
-};
-
-export const changePassword = (
-  userId: number,
-  currentPassword: string,
-  newPassword: string
-) => {
-  const user = getUserById(userId);
-  if (!user) {
-    throw new AuthError('账号不存在', 404);
-  }
-  if (!bcrypt.compareSync(currentPassword, user.password_hash)) {
-    throw new AuthError('当前密码不正确', 400);
-  }
-  const now = formatDateTime(dayjs());
-  const hash = bcrypt.hashSync(newPassword, 12);
-  db.prepare(
-    `UPDATE users
-     SET password_hash = ?, must_change_password = 0, updated_at = ?
-     WHERE id = ?`
-  ).run(hash, now, userId);
-  db.prepare('DELETE FROM sessions WHERE user_id = ?').run(userId);
-  return createSession(userId);
 };

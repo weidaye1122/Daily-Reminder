@@ -7,7 +7,7 @@ import { Notice } from '../components/Notice';
 export const LoginPage = () => {
   const navigate = useNavigate();
   const { user, setUser } = useAppContext();
-  const [username, setUsername] = useState('admin');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -38,17 +38,13 @@ export const LoginPage = () => {
       <div className="login-panel">
         <div className="login-copy">
           <img className="login-logo" src="/brand/logo-512.png" alt="日程提醒助手" />
-          <span className="eyebrow">自部署提醒中心</span>
           <h1>让重要日子按你的节奏准时出现</h1>
-          <p>
-            支持公历、农历、Bark 和企业微信应用消息，所有数据都落在本地 SQLite。
-          </p>
         </div>
 
         <form className="card form-grid" onSubmit={handleSubmit}>
           <div className="section-heading">
             <h2>登录后台</h2>
-            <p>首次启动默认账号通常是 `admin`，密码来自环境变量配置。</p>
+            <p>用户名和密码来自部署环境变量配置。</p>
           </div>
           {error ? <Notice tone="error" message={error} /> : null}
           <label className="field">

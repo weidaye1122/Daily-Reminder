@@ -20,7 +20,7 @@ const pageSubtitles: Record<string, string> = {
   '/channels': '配置 Bark 与企业微信通知渠道',
   '/logs': '查看提醒推送记录和失败原因',
   '/settings': '调整默认提醒时间、时区和日志保留策略',
-  '/profile': '修改账号密码和登录安全设置'
+  '/profile': '查看账号环境变量管理方式'
 };
 
 export const AppShell = () => {

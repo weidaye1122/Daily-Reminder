@@ -1,17 +1,12 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { changePassword, getSessionCookieOptions, login, logout } from '../services/auth';
+import { getSessionCookieOptions, login, logout } from '../services/auth';
 import { AuthError } from '../services/auth';
 import { config } from '../config';
 
 const loginSchema = z.object({
   username: z.string().min(1),
   password: z.string().min(1)
-});
-
-const changePasswordSchema = z.object({
-  currentPassword: z.string().min(6),
-  newPassword: z.string().min(8)
 });
 
 export const authRouter = Router();
@@ -44,24 +39,6 @@ authRouter.get('/me', (req, res, next) => {
   res.json(req.authUser);
 });
 
-authRouter.post('/change-password', (req, res, next) => {
-  try {
-    if (!req.authUser) {
-      throw new AuthError('未登录', 401);
-    }
-    const payload = changePasswordSchema.parse(req.body);
-    const sessionToken = changePassword(
-      req.authUser.id,
-      payload.currentPassword,
-      payload.newPassword
-    );
-    res.cookie(
-      config.sessionCookieName,
-      sessionToken,
-      getSessionCookieOptions()
-    );
-    res.json({ success: true });
-  } catch (error) {
-    next(error);
-  }
+authRouter.post('/change-password', (_req, _res, next) => {
+  next(new AuthError('账号和密码由环境变量管理，请修改部署环境变量后重启服务。', 403));
 });
