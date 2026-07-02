@@ -13,6 +13,17 @@ const defaultSettings: SystemSettings = {
   debugLogging: false
 };
 
+const advanceDayOptions = [
+  { value: 0, label: '当天提醒' },
+  { value: 1, label: '提前 1 天' },
+  { value: 3, label: '提前 3 天' },
+  { value: 7, label: '提前 7 天' },
+  { value: 15, label: '提前 15 天' },
+  { value: 30, label: '提前 30 天' }
+];
+
+const timesPerDayOptions = [1, 2, 3, 4, 5, 6];
+
 const normalizeTimesPerDay = (value: string | number) => {
   const parsed = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(parsed)) {
@@ -84,23 +95,25 @@ export const RulesPage = () => {
               }))
             }
           >
-            <option value={0}>当天提醒</option>
-            <option value={1}>提前 1 天</option>
-            <option value={3}>提前 3 天</option>
-            <option value={7}>提前 7 天</option>
-            <option value={15}>提前 15 天</option>
-            <option value={30}>提前 30 天</option>
+            {advanceDayOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </label>
         <label className="field">
           <span>默认每日提醒次数</span>
-          <input
-            type="number"
-            min={1}
-            max={6}
+          <select
             value={settings.defaultTimesPerDay}
             onChange={(event) => resizeTimes(event.target.value)}
-          />
+          >
+            {timesPerDayOptions.map((count) => (
+              <option key={count} value={count}>
+                {count} 次
+              </option>
+            ))}
+          </select>
         </label>
         <div className="field">
           <span>默认提醒时间</span>

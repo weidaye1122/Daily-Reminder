@@ -37,6 +37,17 @@ const baseSystemSettings: SystemSettings = {
   debugLogging: false
 };
 
+const advanceDayOptions = [
+  { value: 0, label: '当天提醒' },
+  { value: 1, label: '提前 1 天' },
+  { value: 3, label: '提前 3 天' },
+  { value: 7, label: '提前 7 天' },
+  { value: 15, label: '提前 15 天' },
+  { value: 30, label: '提前 30 天' }
+];
+
+const timesPerDayOptions = [1, 2, 3, 4, 5, 6];
+
 const getLocalDateInputValue = () => {
   const current = new Date();
   const offset = current.getTimezoneOffset() * 60_000;
@@ -685,11 +696,8 @@ export const RemindersPage = () => {
           )}
 
           <label className="field">
-            <span>提前开始提醒</span>
-            <input
-              type="number"
-              min={0}
-              max={365}
+            <span>提醒提前天数</span>
+            <select
               value={form.advanceDays}
               onChange={(event) =>
                 setForm((value) => ({
@@ -697,17 +705,26 @@ export const RemindersPage = () => {
                   advanceDays: Number(event.target.value)
                 }))
               }
-            />
+            >
+              {advanceDayOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="field">
             <span>每日提醒次数</span>
-            <input
-              type="number"
-              min={1}
-              max={6}
+            <select
               value={form.timesPerDay}
               onChange={(event) => resizeTimes(event.target.value)}
-            />
+            >
+              {timesPerDayOptions.map((count) => (
+                <option key={count} value={count}>
+                  {count} 次
+                </option>
+              ))}
+            </select>
           </label>
           <div className="field field-span-2">
             <span>提醒时间点</span>
