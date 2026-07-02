@@ -538,8 +538,7 @@ const getCompactReminderFields = (
     reminder.dateType === 'lunar' && preview.lunarLabel
       ? `${preview.lunarLabel}（对应公历 ${formatChineseDate(preview.occurrenceDate, zone)}）`
       : preview.displayLabel;
-  const remindStatus =
-    preview.daysLeft === 0 ? '今天就是提醒日期' : `还有 ${preview.daysLeft} 天`;
+  const remindStatus = preview.daysLeft === 0 ? '今天到期' : `还有 ${preview.daysLeft} 天`;
   return { targetDate, remindStatus };
 };
 

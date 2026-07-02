@@ -4,10 +4,7 @@ import type {
   Reminder,
   ReminderSchedulePreview
 } from '../../shared/types';
-import {
-  buildCompactReminderBody,
-  buildCompactReminderTemplate
-} from './date-calculator';
+import { buildCompactReminderBody } from './date-calculator';
 import { getNotificationSettings, getRawNotificationSettings, updateCachedWecomToken } from './settings';
 import { dayjs, formatDateTime } from '../utils/time';
 
@@ -217,15 +214,9 @@ export const sendReminderThroughChannel = async (
   timezone: string
 ) => {
   const settings = getNotificationSettings();
-  const title = channel === 'bark' ? reminder.title : settings.barkDefaultTitle || '日程提醒助手';
-  const message =
-    channel === 'bark'
-      ? buildCompactReminderBody(reminder, preview, timezone)
-      : buildCompactReminderTemplate(reminder, preview, timezone, { boldTitle: true });
-  const responseText = await sendChannelMessage(channel, settings, title, message, {
-    includeAcknowledgementHint: channel === 'wecom',
-    markdown: channel === 'wecom'
-  });
+  const title = reminder.title;
+  const message = buildCompactReminderBody(reminder, preview, timezone);
+  const responseText = await sendChannelMessage(channel, settings, title, message);
   return {
     message,
     responseText
