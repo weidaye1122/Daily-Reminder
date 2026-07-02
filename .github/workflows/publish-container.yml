@@ -8,7 +8,7 @@ on:
 
 env:
   IMAGE_NAME: schedule-reminder-assistant
-  VERSION_TAG: "0.1.3"
+  VERSION_TAG: "0.1.4"
   DOCKERHUB_IMAGE: weidaye1122/schedule-reminder-assistant
   GHCR_IMAGE: ghcr.io/${{ github.repository_owner }}/schedule-reminder-assistant
 

@@ -85,7 +85,11 @@ export const normalizeReminderInput = (
     throw new ReminderValidationError('请至少选择一个通知渠道');
   }
 
-  if (input.dateType === 'solar') {
+  if (input.repeatType === 'weekly') {
+    if (!input.solarDate) {
+      throw new ReminderValidationError('每周提醒需要选择星期');
+    }
+  } else if (input.dateType === 'solar') {
     if (!input.solarDate) {
       throw new ReminderValidationError('请选择公历日期');
     }
@@ -102,13 +106,17 @@ export const normalizeReminderInput = (
   return {
     ...input,
     title: input.title.trim(),
+    dateType: input.repeatType === 'weekly' ? 'solar' : input.dateType,
     solarDate: input.solarDate,
     lunarMonth:
-      input.dateType === 'lunar' && input.repeatType === 'monthly'
+      input.repeatType === 'weekly' ||
+      (input.dateType === 'lunar' && input.repeatType === 'monthly')
         ? null
         : input.lunarMonth,
+    lunarDay: input.repeatType === 'weekly' ? null : input.lunarDay,
     isLeapMonth:
-      input.dateType === 'lunar' && input.repeatType === 'monthly'
+      input.repeatType === 'weekly' ||
+      (input.dateType === 'lunar' && input.repeatType === 'monthly')
         ? false
         : input.isLeapMonth,
     remindTimes,

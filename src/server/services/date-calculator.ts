@@ -26,7 +26,7 @@ export class ReminderValidationError extends Error {
   }
 }
 
-const WEEK_LABELS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+const WEEK_LABELS = ['星期天', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
 const LUNAR_MONTH_LABELS = [
   '',
   '正月',
@@ -212,6 +212,10 @@ const getWeeklyAnchorWeekday = (
   zone: string,
   referenceDate: dayjs.Dayjs
 ) => {
+  if (reminder.solarDate) {
+    return parseDate(reminder.solarDate, zone).day();
+  }
+
   if (reminder.dateType === 'lunar') {
     const lunarOccurrence = findNextLunarYearlyOccurrence(reminder, referenceDate, zone);
     if (!lunarOccurrence) {
@@ -220,7 +224,7 @@ const getWeeklyAnchorWeekday = (
     return lunarOccurrence.day();
   }
 
-  return parseDate(reminder.solarDate!, zone).day();
+  throw new ReminderValidationError('每周提醒需要选择星期');
 };
 
 export const validateLunarSelection = (

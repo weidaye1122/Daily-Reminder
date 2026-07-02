@@ -50,9 +50,37 @@ const repeatTypeLabels: Record<ReminderInput['repeatType'], string> = {
   once: '一次性'
 };
 
+const weekdayOptions = [
+  { value: 1, label: '星期一' },
+  { value: 2, label: '星期二' },
+  { value: 3, label: '星期三' },
+  { value: 4, label: '星期四' },
+  { value: 5, label: '星期五' },
+  { value: 6, label: '星期六' },
+  { value: 0, label: '星期天' }
+];
+
+const weekdayAnchorDates: Record<number, string> = {
+  1: '2024-01-01',
+  2: '2024-01-02',
+  3: '2024-01-03',
+  4: '2024-01-04',
+  5: '2024-01-05',
+  6: '2024-01-06',
+  0: '2024-01-07'
+};
+
 const channelLabels: Record<ReminderInput['channels'][number], string> = {
   bark: 'Bark',
   wecom: '企业微信'
+};
+
+const getWeekdayFromSolarDate = (solarDate: string | null) => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(solarDate ?? '');
+  if (!match) {
+    return 1;
+  }
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])).getDay();
 };
 
 const normalizeTimesPerDay = (value: string | number) => {
@@ -517,35 +545,37 @@ export const RemindersPage = () => {
               onChange={(event) => setForm((value) => ({ ...value, title: event.target.value }))}
             />
           </label>
-          <div className="field">
-            <span>日期类型</span>
-            <div className="segmented-control">
-              <button
-                type="button"
-                className={form.dateType === 'solar' ? 'active' : ''}
-                onClick={() =>
-                  setForm((value) => ({
-                    ...value,
-                    dateType: 'solar'
-                  }))
-                }
-              >
-                公历
-              </button>
-              <button
-                type="button"
-                className={form.dateType === 'lunar' ? 'active' : ''}
-                onClick={() =>
-                  setForm((value) => ({
-                    ...value,
-                    dateType: 'lunar'
-                  }))
-                }
-              >
-                农历
-              </button>
+          {form.repeatType !== 'weekly' ? (
+            <div className="field">
+              <span>日期类型</span>
+              <div className="segmented-control">
+                <button
+                  type="button"
+                  className={form.dateType === 'solar' ? 'active' : ''}
+                  onClick={() =>
+                    setForm((value) => ({
+                      ...value,
+                      dateType: 'solar'
+                    }))
+                  }
+                >
+                  公历
+                </button>
+                <button
+                  type="button"
+                  className={form.dateType === 'lunar' ? 'active' : ''}
+                  onClick={() =>
+                    setForm((value) => ({
+                      ...value,
+                      dateType: 'lunar'
+                    }))
+                  }
+                >
+                  农历
+                </button>
+              </div>
             </div>
-          </div>
+          ) : null}
           <div className="field">
             <span>重复方式</span>
             <div className="segmented-control segmented-control-4">
@@ -555,12 +585,18 @@ export const RemindersPage = () => {
                   type="button"
                   className={form.repeatType === option.value ? 'active' : ''}
                   disabled={option.disabled}
-                  onClick={() =>
+                  onClick={() => {
+                    const repeatType = option.value as ReminderInput['repeatType'];
                     setForm((value) => ({
                       ...value,
-                      repeatType: option.value as ReminderInput['repeatType']
-                    }))
-                  }
+                      dateType: repeatType === 'weekly' ? 'solar' : value.dateType,
+                      repeatType,
+                      solarDate:
+                        repeatType === 'weekly'
+                          ? weekdayAnchorDates[getWeekdayFromSolarDate(value.solarDate)]
+                          : value.solarDate
+                    }));
+                  }}
                 >
                   {option.label}
                 </button>
@@ -568,7 +604,22 @@ export const RemindersPage = () => {
             </div>
           </div>
 
-          {form.dateType === 'solar' ? (
+          {form.repeatType === 'weekly' ? (
+            <div className="field field-span-2">
+              <span>每周提醒日</span>
+              <InlinePicker
+                value={getWeekdayFromSolarDate(form.solarDate)}
+                options={weekdayOptions}
+                onChange={(weekday) =>
+                  setForm((value) => ({
+                    ...value,
+                    dateType: 'solar',
+                    solarDate: weekdayAnchorDates[weekday]
+                  }))
+                }
+              />
+            </div>
+          ) : form.dateType === 'solar' ? (
             <label className="field field-span-2">
               <span>日期</span>
               <input
