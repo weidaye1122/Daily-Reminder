@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { SystemSettings } from '@shared/types';
 import { api, ApiError } from '../lib/api';
 import { Notice } from '../components/Notice';
+import { TimePicker } from '../components/TimePicker';
 
 const defaultSettings: SystemSettings = {
   timezone: 'Asia/Shanghai',
@@ -105,14 +106,13 @@ export const RulesPage = () => {
           <span>默认提醒时间</span>
           <div className="inline-grid">
             {settings.defaultRemindTimes.map((time, index) => (
-              <input
+              <TimePicker
                 key={`default-remind-time-${index}`}
-                type="time"
                 value={time}
-                onChange={(event) =>
+                onChange={(nextTime) =>
                   setSettings((current) => {
                     const nextTimes = [...current.defaultRemindTimes];
-                    nextTimes[index] = event.target.value;
+                    nextTimes[index] = nextTime;
                     return { ...current, defaultRemindTimes: nextTimes };
                   })
                 }

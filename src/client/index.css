@@ -72,8 +72,8 @@ a {
 }
 
 .brand-logo {
-  width: 104px;
-  height: 104px;
+  width: 208px;
+  height: 208px;
   border-radius: 30px;
   object-fit: cover;
 }
@@ -388,6 +388,110 @@ a {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
   gap: 12px;
+}
+
+.time-picker {
+  min-width: 0;
+}
+
+.time-picker-trigger {
+  justify-content: center;
+  min-height: 50px;
+}
+
+.time-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.18);
+}
+
+.time-picker-sheet {
+  width: min(430px, 100%);
+  padding: 18px;
+  border: 1px solid rgba(130, 149, 182, 0.22);
+  border-radius: 28px;
+  background: rgba(251, 253, 255, 0.96);
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.22);
+  backdrop-filter: blur(18px);
+}
+
+.time-picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.time-picker-head span,
+.time-picker-column-wrap > span {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.time-picker-head strong {
+  font-size: 1.6rem;
+  letter-spacing: 0.02em;
+}
+
+.time-picker-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.time-picker-column-wrap {
+  display: grid;
+  gap: 8px;
+}
+
+.time-picker-column {
+  max-height: 240px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid rgba(130, 149, 182, 0.18);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.84);
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+
+.time-picker-column::-webkit-scrollbar {
+  display: none;
+}
+
+.time-picker-column button {
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #53657c;
+  font-size: 1.05rem;
+  scroll-snap-align: center;
+}
+
+.time-picker-column button.active {
+  background: linear-gradient(135deg, #1971d4 0%, #3b82f6 100%);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 10px 22px rgba(25, 113, 212, 0.18);
+}
+
+.time-picker-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.time-picker-actions button {
+  min-width: 112px;
 }
 
 .primary-button,
@@ -918,6 +1022,19 @@ a {
   .drawer-backdrop {
     align-items: flex-end;
     padding: 0;
+  }
+
+  .time-picker-backdrop {
+    align-items: flex-end;
+    padding: 12px;
+  }
+
+  .time-picker-sheet {
+    border-radius: 28px;
+  }
+
+  .time-picker-column {
+    max-height: 38vh;
   }
 
   .actions-row,

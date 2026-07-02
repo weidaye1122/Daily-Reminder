@@ -9,6 +9,7 @@ import type {
 import { api, ApiError } from '../lib/api';
 import { Notice } from '../components/Notice';
 import { Drawer } from '../components/Drawer';
+import { TimePicker } from '../components/TimePicker';
 
 const lunarMonths = [
   { value: 1, label: '正月' },
@@ -661,14 +662,13 @@ export const RemindersPage = () => {
             <span>提醒时间点</span>
             <div className="inline-grid">
               {form.remindTimes.map((time, index) => (
-                <input
+                <TimePicker
                   key={`remind-time-${index}`}
-                  type="time"
                   value={time}
-                  onChange={(event) =>
+                  onChange={(nextTime) =>
                     setForm((current) => {
                       const nextTimes = [...current.remindTimes];
-                      nextTimes[index] = event.target.value;
+                      nextTimes[index] = nextTime;
                       return { ...current, remindTimes: nextTimes };
                     })
                   }
