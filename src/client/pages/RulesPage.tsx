@@ -12,6 +12,14 @@ const defaultSettings: SystemSettings = {
   debugLogging: false
 };
 
+const normalizeTimesPerDay = (value: string | number) => {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(parsed)) {
+    return 1;
+  }
+  return Math.min(6, Math.max(1, Math.trunc(parsed)));
+};
+
 export const RulesPage = () => {
   const [settings, setSettings] = useState<SystemSettings>(defaultSettings);
   const [message, setMessage] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
@@ -28,7 +36,8 @@ export const RulesPage = () => {
       );
   }, []);
 
-  const resizeTimes = (count: number) => {
+  const resizeTimes = (value: string | number) => {
+    const count = normalizeTimesPerDay(value);
     setSettings((current) => {
       const nextTimes = [...current.defaultRemindTimes];
       while (nextTimes.length < count) {
@@ -89,7 +98,7 @@ export const RulesPage = () => {
             min={1}
             max={6}
             value={settings.defaultTimesPerDay}
-            onChange={(event) => resizeTimes(Number(event.target.value))}
+            onChange={(event) => resizeTimes(event.target.value)}
           />
         </label>
         <div className="field">
@@ -97,7 +106,7 @@ export const RulesPage = () => {
           <div className="inline-grid">
             {settings.defaultRemindTimes.map((time, index) => (
               <input
-                key={`${index}-${time}`}
+                key={`default-remind-time-${index}`}
                 type="time"
                 value={time}
                 onChange={(event) =>

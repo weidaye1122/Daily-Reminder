@@ -54,6 +54,14 @@ const channelLabels: Record<ReminderInput['channels'][number], string> = {
   wecom: '企业微信'
 };
 
+const normalizeTimesPerDay = (value: string | number) => {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(parsed)) {
+    return 1;
+  }
+  return Math.min(6, Math.max(1, Math.trunc(parsed)));
+};
+
 const lunarDayLabels = [
   '',
   '初一',
@@ -280,7 +288,8 @@ export const RemindersPage = () => {
     setDrawerOpen(true);
   };
 
-  const resizeTimes = (count: number) => {
+  const resizeTimes = (value: string | number) => {
+    const count = normalizeTimesPerDay(value);
     setForm((current) => {
       const nextTimes = [...current.remindTimes];
       while (nextTimes.length < count) {
@@ -645,7 +654,7 @@ export const RemindersPage = () => {
               min={1}
               max={6}
               value={form.timesPerDay}
-              onChange={(event) => resizeTimes(Number(event.target.value))}
+              onChange={(event) => resizeTimes(event.target.value)}
             />
           </label>
           <div className="field field-span-2">
@@ -653,7 +662,7 @@ export const RemindersPage = () => {
             <div className="inline-grid">
               {form.remindTimes.map((time, index) => (
                 <input
-                  key={`${index}-${time}`}
+                  key={`remind-time-${index}`}
                   type="time"
                   value={time}
                   onChange={(event) =>
