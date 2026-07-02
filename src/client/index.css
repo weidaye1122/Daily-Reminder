@@ -166,10 +166,12 @@ a {
 .page-stack {
   display: grid;
   gap: 20px;
+  min-width: 0;
 }
 
 .card,
 .stat-card {
+  min-width: 0;
   background: var(--bg-panel);
   border: 1px solid rgba(130, 149, 182, 0.18);
   border-radius: 24px;
@@ -184,6 +186,7 @@ a {
 .two-column {
   display: grid;
   gap: 20px;
+  min-width: 0;
 }
 
 .stats-grid {
@@ -555,6 +558,8 @@ a {
 }
 
 .table-wrap {
+  width: 100%;
+  max-width: 100%;
   overflow: auto;
 }
 
@@ -627,6 +632,11 @@ a {
   display: flex;
   justify-content: space-between;
   gap: 8px;
+}
+
+.list-item p,
+.mobile-card p {
+  margin: 0;
 }
 
 .distribution-card {

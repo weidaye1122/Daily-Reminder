@@ -180,6 +180,42 @@ const sendWecom = async (
   return JSON.stringify(responsePayload);
 };
 
+export const sendWecomTextToUser = async (
+  settings: NotificationSettings,
+  toUser: string,
+  content: string
+) => {
+  const token = await resolveWecomToken(settings);
+  const response = await fetch(
+    buildWecomUrl(settings, '/cgi-bin/message/send', {
+      access_token: token
+    }),
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        touser: toUser.trim() || settings.wecomToUser || '@all',
+        msgtype: 'text',
+        agentid: Number(settings.wecomAgentId),
+        text: {
+          content
+        },
+        safe: 0
+      })
+    }
+  );
+  const responsePayload = (await response.json()) as { errcode?: number; errmsg?: string };
+  if (!response.ok || responsePayload.errcode) {
+    throw new NotificationError(
+      `企业微信确认回执发送失败：${responsePayload.errmsg ?? response.statusText}`,
+      response.status || 500
+    );
+  }
+  return JSON.stringify(responsePayload);
+};
+
 export const sendChannelMessage = async (
   channel: NotificationChannel,
   settings: NotificationSettings,

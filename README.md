@@ -63,7 +63,7 @@ pnpm dev
 
 - GitHub Container Registry：`ghcr.io/weidaye1122/schedule-reminder-assistant:latest`
 - Docker Hub：`weidaye1122/schedule-reminder-assistant:latest`
-- 固定版本标签：`0.1.6`
+- 固定版本标签：`0.1.7`
 - 最新版本标签：`latest`
 
 ### 本地 Docker Compose

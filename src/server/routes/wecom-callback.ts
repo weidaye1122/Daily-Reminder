@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getNotificationSettings } from '../services/settings';
+import { getNotificationSettings, getSystemSettings } from '../services/settings';
 import {
   WecomCallbackError,
   decryptWecomCallbackPayload,
@@ -8,6 +8,10 @@ import {
   verifyWecomCallbackSignature
 } from '../services/wecom-callback';
 import { acknowledgeLatestWecomReminder } from '../services/wecom-acknowledgements';
+import { getReminder } from '../services/reminders';
+import { getReminderPreview } from '../services/date-calculator';
+import { sendWecomTextToUser } from '../services/notifications';
+import { dayjs } from '../utils/time';
 
 const getQueryValue = (value: unknown) => {
   if (Array.isArray(value)) {
@@ -39,6 +43,32 @@ const verifySignatureOrThrow = (input: {
   }
 };
 
+const buildAcknowledgementReply = (
+  reminderId: number,
+  occurrenceDate: string
+) => {
+  const reminder = getReminder(reminderId);
+  if (!reminder) {
+    return '已确认提醒，本周期不再提醒。';
+  }
+
+  const systemSettings = getSystemSettings();
+  const nextCycleReference = dayjs
+    .tz(`${occurrenceDate} 23:59:59`, 'YYYY-MM-DD HH:mm:ss', systemSettings.timezone)
+    .add(1, 'second');
+  const nextPreview = getReminderPreview(
+    reminder,
+    systemSettings.timezone,
+    nextCycleReference
+  );
+
+  if (!nextPreview) {
+    return `已确认「${reminder.title}」提醒，本提醒没有下个周期。`;
+  }
+
+  return `已跳转「${reminder.title}」提醒到下个周期（${nextPreview.nextRemindDate} ${nextPreview.nextRemindTime}）`;
+};
+
 export const wecomCallbackRouter = Router();
 
 wecomCallbackRouter.get('/', (req, res, next) => {
@@ -65,7 +95,7 @@ wecomCallbackRouter.get('/', (req, res, next) => {
 });
 
 wecomCallbackRouter.post('/', (req, res, next) => {
-  try {
+  void (async () => {
     const settings = getCallbackConfig();
     const xml = typeof req.body === 'string' ? req.body : '';
     const encryptedText = extractEncryptedWecomMessage(xml);
@@ -85,11 +115,39 @@ wecomCallbackRouter.post('/', (req, res, next) => {
     const message = parseWecomIncomingMessage(decrypted.message);
 
     if (message.msgType === 'text') {
-      acknowledgeLatestWecomReminder(message.fromUserName, message.content);
+      const acknowledgement = acknowledgeLatestWecomReminder(
+        message.fromUserName,
+        message.content
+      );
+      if (
+        acknowledgement.acknowledged &&
+        typeof acknowledgement.reminderId === 'number' &&
+        acknowledgement.occurrenceDate
+      ) {
+        try {
+          const reply = buildAcknowledgementReply(
+            acknowledgement.reminderId,
+            acknowledgement.occurrenceDate
+          );
+          await sendWecomTextToUser(settings, message.fromUserName, reply);
+        } catch (error) {
+          console.error('企业微信确认回执发送失败', error);
+        }
+      } else if (acknowledgement.accepted) {
+        try {
+          await sendWecomTextToUser(
+            settings,
+            message.fromUserName,
+            '已收到回复，但当前没有待跳转的提醒。'
+          );
+        } catch (error) {
+          console.error('企业微信确认回执发送失败', error);
+        }
+      }
     }
 
     res.type('text/plain').send('success');
-  } catch (error) {
+  })().catch((error) => {
     next(error);
-  }
+  });
 });

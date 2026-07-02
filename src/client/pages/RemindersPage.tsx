@@ -462,7 +462,7 @@ export const RemindersPage = () => {
                           <div>
                             {item.preview.nextRemindDate} {item.preview.nextRemindTime}
                           </div>
-                          <small>{item.preview.displayLabel}</small>
+                          <small>目标日期：{item.preview.displayLabel}</small>
                         </>
                       ) : (
                         <span className="muted">{item.previewError ?? '暂无可计算日期'}</span>
@@ -519,12 +519,19 @@ export const RemindersPage = () => {
                     {item.enabled ? '启用中' : '已停用'}
                   </span>
                 </div>
+                {item.preview ? (
+                  <>
+                    <p>下次提醒：{item.preview.nextRemindDate} {item.preview.nextRemindTime}</p>
+                    <p>目标日期：{item.preview.displayLabel}</p>
+                  </>
+                ) : (
+                  <p>{item.previewError ?? '暂无可计算日期'}</p>
+                )}
                 <p>
-                  {item.preview
-                    ? `下次提醒：${item.preview.nextRemindDate} ${item.preview.nextRemindTime} · ${item.preview.displayLabel}`
-                    : item.previewError ?? '暂无可计算日期'}
+                  日期类型：{item.dateType === 'solar' ? '公历' : '农历'} · 重复方式：{repeatTypeLabels[item.repeatType]}
                 </p>
                 <p>时间：{item.remindTimes.join('、')}</p>
+                <p>渠道：{item.channels.map((channel) => channelLabels[channel]).join(' / ')}</p>
                 <div className="table-actions">
                   <button type="button" className="ghost-button" onClick={() => openEdit(item)}>
                     编辑
@@ -533,7 +540,10 @@ export const RemindersPage = () => {
                     {item.enabled ? '停用' : '启用'}
                   </button>
                   <button type="button" className="ghost-button" onClick={() => void testSend(item)}>
-                    测试
+                    测试发送
+                  </button>
+                  <button type="button" className="ghost-button" onClick={() => navigate(`/logs?reminderId=${item.id}`)}>
+                    查看日志
                   </button>
                   <button type="button" className="danger-button" onClick={() => void remove(item)}>
                     删除
@@ -542,7 +552,7 @@ export const RemindersPage = () => {
               </article>
             ))
           ) : (
-            <div className="empty-state">还没有提醒事项。</div>
+            <div className="empty-state">还没有提醒事项，先新建一条吧。</div>
           )}
         </div>
       </section>
