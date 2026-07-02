@@ -63,7 +63,7 @@ pnpm dev
 
 - GitHub Container Registry：`ghcr.io/weidaye1122/schedule-reminder-assistant:latest`
 - Docker Hub：`weidaye1122/schedule-reminder-assistant:latest`
-- 固定版本标签：`0.1`
+- 固定版本标签：`0.1.1`
 - 最新版本标签：`latest`
 
 ### 本地 Docker Compose
@@ -138,6 +138,11 @@ services:
       # SQLite 数据库路径，必须放在 /app/data 下才能持久化。
       DATABASE_URL: /app/data/reminder.db
 
+      # 登录 Cookie 是否只允许 HTTPS。
+      # 群晖用 http://群晖IP:3000 访问时保持 false，否则刷新后浏览器可能不会保留登录。
+      # 如果你已经通过 HTTPS 域名访问，可以改成 true。
+      COOKIE_SECURE: "false"
+
       # 管理员账号和密码。
       # 修改后重启容器即可同步到系统，登录请使用这里填写的值。
       DEFAULT_ADMIN_USERNAME: admin
@@ -185,6 +190,7 @@ DEFAULT_ADMIN_PASSWORD=admin123456
 TZ=Asia/Shanghai
 PORT=3000
 DATABASE_URL=/app/data/reminder.db
+COOKIE_SECURE=false
 
 DEFAULT_ADMIN_USERNAME=admin
 DEFAULT_ADMIN_PASSWORD=admin123456
@@ -206,6 +212,7 @@ WECOM_TO_USER=@all
 
 - `TZ`：调度任务使用的默认时区
 - `DATABASE_URL`：SQLite 数据库路径
+- `COOKIE_SECURE`：是否只允许 HTTPS 保存登录 Cookie，普通 HTTP 访问请保持 `false`
 - `DEFAULT_ADMIN_*`：管理员账号和密码，服务启动时会自动同步
 - `BARK_*` 和 `WECOM_*`：可选的初始通知配置，后续也可在 Web 页面修改
 

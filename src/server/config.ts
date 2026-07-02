@@ -5,6 +5,13 @@ const resolveNumber = (value: string | undefined, fallback: number) => {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 };
 
+const resolveBoolean = (value: string | undefined, fallback: boolean) => {
+  if (value === undefined || value.trim() === '') {
+    return fallback;
+  }
+  return ['1', 'true', 'yes', 'on'].includes(value.trim().toLowerCase());
+};
+
 export const config = {
   port: resolveNumber(process.env.PORT, 3000),
   databaseUrl:
@@ -24,5 +31,9 @@ export const config = {
   wecomEncodingAesKey: process.env.WECOM_ENCODING_AES_KEY ?? '',
   wecomToUser: process.env.WECOM_TO_USER ?? '@all',
   sessionCookieName: 'schedule_reminder_session',
-  sessionDays: 14
+  sessionDays: 14,
+  cookieSecure: resolveBoolean(
+    process.env.COOKIE_SECURE ?? process.env.SESSION_COOKIE_SECURE,
+    false
+  )
 };

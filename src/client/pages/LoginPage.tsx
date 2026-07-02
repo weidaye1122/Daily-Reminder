@@ -38,13 +38,14 @@ export const LoginPage = () => {
       <div className="login-panel">
         <div className="login-copy">
           <img className="login-logo" src="/brand/logo-512.png" alt="日程提醒助手" />
-          <h1>让重要日子按你的节奏准时出现</h1>
+          <h1>
+            <span>重要日子</span>
+            <span>按你的节奏</span>
+            <span>准时出现</span>
+          </h1>
         </div>
 
         <form className="card form-grid" onSubmit={handleSubmit}>
-          <div className="section-heading">
-            <h2>登录后台</h2>
-          </div>
           {error ? <Notice tone="error" message={error} /> : null}
           <label className="field">
             <span>用户名</span>

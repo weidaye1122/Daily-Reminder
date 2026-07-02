@@ -41,7 +41,7 @@ const sha256 = (value: string) =>
 const sessionCookieOptions = (): CookieOptions => ({
   httpOnly: true,
   sameSite: 'lax',
-  secure: process.env.NODE_ENV === 'production',
+  secure: config.cookieSecure,
   maxAge: config.sessionDays * 24 * 60 * 60 * 1000,
   path: '/'
 });
