@@ -44,7 +44,6 @@ export const LoginPage = () => {
         <form className="card form-grid" onSubmit={handleSubmit}>
           <div className="section-heading">
             <h2>登录后台</h2>
-            <p>用户名和密码来自部署环境变量配置。</p>
           </div>
           {error ? <Notice tone="error" message={error} /> : null}
           <label className="field">
