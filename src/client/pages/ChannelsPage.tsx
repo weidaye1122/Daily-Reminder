@@ -230,7 +230,7 @@ export const ChannelsPage = () => {
             />
           </label>
           <div className="tip-box">
-            不填会使用官方企业微信接口；如果服务器不能直连企业微信，可填写反向代理地址。
+            不填会使用官方企业微信接口；反向代理地址支持 http:// 和 https://。
           </div>
           <label className="field">
             <span>Token</span>

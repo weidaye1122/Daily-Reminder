@@ -69,7 +69,9 @@ const buildWecomUrl = async (
     url.searchParams.set(key, value);
   }
   try {
-    await assertSafeNotificationUrl(url, '企业微信 API 代理地址');
+    await assertSafeNotificationUrl(url, '企业微信 API 代理地址', {
+      allowHttp: true
+    });
   } catch (error) {
     throw new NotificationError(
       error instanceof Error ? error.message : '企业微信 API 代理地址不安全'

@@ -48,10 +48,10 @@ One risk is intentionally left as a documented tradeoff: notification secrets ar
 - Status: Fixed
 - Changes:
   - Bark and WeCom outbound URLs are validated before fetch.
-  - HTTPS is required by default.
+  - HTTPS is required by default for Bark; WeCom proxy URLs support HTTP and HTTPS.
   - Private, loopback, and local addresses are blocked by default, including DNS results.
   - Fetch calls now use a timeout and reject redirects.
-  - Operators can explicitly enable internal or HTTP notification endpoints with:
+  - Operators can explicitly enable internal notification endpoints or Bark HTTP endpoints with:
     - `ALLOW_PRIVATE_NOTIFICATION_URLS=true`
     - `ALLOW_INSECURE_NOTIFICATION_URLS=true`
 

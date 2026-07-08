@@ -63,7 +63,7 @@ pnpm dev
 
 - GitHub Container Registry：`ghcr.io/weidaye1122/schedule-reminder-assistant:latest`
 - Docker Hub：`weidaye1122/schedule-reminder-assistant:latest`
-- 固定版本标签：`0.0.2`
+- 固定版本标签：`0.0.3`
 - 最新版本标签：`latest`
 
 ### 本地 Docker Compose
@@ -149,7 +149,7 @@ services:
       DEFAULT_ADMIN_PASSWORD: change-me-before-start
 
       # 通知接口外发安全限制。
-      # 默认只允许 HTTPS 和公网地址；如果确实要连接内网 Bark 或 HTTP 代理，请显式改成 true。
+      # 默认拦截内网/本机地址；Bark HTTP 需显式放开，企业微信代理支持 HTTP/HTTPS。
       ALLOW_PRIVATE_NOTIFICATION_URLS: "false"
       ALLOW_INSECURE_NOTIFICATION_URLS: "false"
       NOTIFICATION_REQUEST_TIMEOUT_MS: 10000
@@ -225,7 +225,7 @@ WECOM_TO_USER=@all
 - `COOKIE_SECURE`：是否只允许 HTTPS 保存登录 Cookie，普通 HTTP 访问请保持 `false`
 - `DEFAULT_ADMIN_*`：管理员账号和密码，服务启动时会自动同步
 - `ALLOW_PRIVATE_NOTIFICATION_URLS`：是否允许 Bark / 企业微信代理地址指向内网或本机地址，默认 `false`
-- `ALLOW_INSECURE_NOTIFICATION_URLS`：是否允许 Bark / 企业微信代理地址使用 HTTP，生产环境默认建议保持 `false`
+- `ALLOW_INSECURE_NOTIFICATION_URLS`：是否允许 Bark Server 地址使用 HTTP；企业微信代理地址已支持 HTTP 和 HTTPS
 - `NOTIFICATION_REQUEST_TIMEOUT_MS`：通知接口请求超时时间，默认 `10000`
 - `BARK_*` 和 `WECOM_*`：可选的初始通知配置，后续也可在 Web 页面修改
 
@@ -261,14 +261,14 @@ WECOM_TO_USER=@all
 - 缓存 token
 - 过期前自动刷新
 
-如果服务器访问企业微信官方接口不稳定，可以在“消息代理地址”中填写反向代理地址。系统会把 `gettoken` 和 `message/send` 两个接口请求都发送到这个基础地址下，例如填写 `https://proxy.example.com/wecom` 后，请代理转发：
+如果服务器访问企业微信官方接口不稳定，可以在“消息代理地址”中填写反向代理地址，支持 `http://` 和 `https://`。系统会把 `gettoken` 和 `message/send` 两个接口请求都发送到这个基础地址下，例如填写 `http://proxy.example.com/wecom` 或 `https://proxy.example.com/wecom` 后，请代理转发：
 
 - `/wecom/cgi-bin/gettoken`
 - `/wecom/cgi-bin/message/send`
 
 填写后可以直接点击“测试企业微信推送”。
 
-出于安全考虑，通知外发地址默认只允许 HTTPS 和公网地址。若你明确需要连接内网 Bark 服务或 HTTP 代理，需要在部署环境中把 `ALLOW_PRIVATE_NOTIFICATION_URLS` 或 `ALLOW_INSECURE_NOTIFICATION_URLS` 显式设为 `true`。
+出于安全考虑，通知外发地址默认会拦截内网或本机地址；Bark Server 默认只允许 HTTPS。企业微信消息代理地址支持 HTTP 和 HTTPS，但如果代理指向内网或本机地址，仍需要在部署环境中把 `ALLOW_PRIVATE_NOTIFICATION_URLS` 显式设为 `true`。
 
 ### 企业微信回复确认
 

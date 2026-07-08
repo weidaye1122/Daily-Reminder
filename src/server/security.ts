@@ -140,12 +140,25 @@ const assertPublicHostname = async (url: URL, label: string) => {
   }
 };
 
-export const assertSafeNotificationUrl = async (url: URL, label: string) => {
+type SafeNotificationUrlOptions = {
+  allowHttp?: boolean;
+};
+
+export const assertSafeNotificationUrl = async (
+  url: URL,
+  label: string,
+  options: SafeNotificationUrlOptions = {}
+) => {
+  const allowHttp = options.allowHttp || config.allowInsecureNotificationUrls;
   if (
     url.protocol !== 'https:' &&
-    !(config.allowInsecureNotificationUrls && url.protocol === 'http:')
+    !(allowHttp && url.protocol === 'http:')
   ) {
-    throw new Error(`${label} 必须使用 HTTPS 地址`);
+    throw new Error(
+      allowHttp
+        ? `${label} 必须使用 HTTP 或 HTTPS 地址`
+        : `${label} 必须使用 HTTPS 地址`
+    );
   }
 
   if (url.username || url.password) {
