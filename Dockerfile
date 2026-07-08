@@ -16,7 +16,7 @@ COPY public ./public
 
 RUN pnpm build
 
-RUN mkdir -p /app/data
+RUN mkdir -p /app/data && chown -R node:node /app /pnpm
 
 ENV NODE_ENV=production
 ENV TZ=Asia/Shanghai
@@ -24,5 +24,7 @@ ENV PORT=3000
 ENV DATABASE_URL=/app/data/reminder.db
 
 EXPOSE 3000
+
+USER node
 
 CMD ["pnpm", "start"]

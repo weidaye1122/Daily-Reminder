@@ -63,7 +63,7 @@ pnpm dev
 
 - GitHub Container Registry：`ghcr.io/weidaye1122/schedule-reminder-assistant:latest`
 - Docker Hub：`weidaye1122/schedule-reminder-assistant:latest`
-- 固定版本标签：`0.0.1`
+- 固定版本标签：`0.0.2`
 - 最新版本标签：`latest`
 
 ### 本地 Docker Compose
@@ -74,7 +74,7 @@ pnpm dev
 cp .env.example .env
 ```
 
-2. 根据需要修改 `.env` 中的管理员账号、Bark、企业微信配置。
+2. 修改 `.env` 中的管理员密码，并根据需要填写 Bark、企业微信配置。生产环境不能使用示例密码。
 
 3. 构建并启动：
 
@@ -146,7 +146,13 @@ services:
       # 管理员账号和密码。
       # 修改后重启容器即可同步到系统，登录请使用这里填写的值。
       DEFAULT_ADMIN_USERNAME: admin
-      DEFAULT_ADMIN_PASSWORD: admin123456
+      DEFAULT_ADMIN_PASSWORD: change-me-before-start
+
+      # 通知接口外发安全限制。
+      # 默认只允许 HTTPS 和公网地址；如果确实要连接内网 Bark 或 HTTP 代理，请显式改成 true。
+      ALLOW_PRIVATE_NOTIFICATION_URLS: "false"
+      ALLOW_INSECURE_NOTIFICATION_URLS: "false"
+      NOTIFICATION_REQUEST_TIMEOUT_MS: 10000
 
       # Bark 配置，可先留空，之后在网页“通知渠道”里填写。
       BARK_SERVER_URL: https://api.day.app
@@ -179,10 +185,10 @@ http://群晖IP:3000
 
 ```env
 DEFAULT_ADMIN_USERNAME=admin
-DEFAULT_ADMIN_PASSWORD=admin123456
+DEFAULT_ADMIN_PASSWORD=change-me-before-start
 ```
 
-如果数据库里还没有用户，系统会自动创建管理员账号；如果已经存在用户，系统会更新第一个管理员账号的用户名和密码，并清理旧登录会话。
+如果数据库里还没有用户，系统会自动创建管理员账号；如果已经存在用户，系统会更新第一个管理员账号的用户名和密码，并清理旧登录会话。生产环境必须把 `DEFAULT_ADMIN_PASSWORD` 改成你自己的强密码，不能留空或使用示例值。
 
 ## 环境变量说明
 
@@ -193,7 +199,11 @@ DATABASE_URL=/app/data/reminder.db
 COOKIE_SECURE=false
 
 DEFAULT_ADMIN_USERNAME=admin
-DEFAULT_ADMIN_PASSWORD=admin123456
+DEFAULT_ADMIN_PASSWORD=change-me-before-start
+
+ALLOW_PRIVATE_NOTIFICATION_URLS=false
+ALLOW_INSECURE_NOTIFICATION_URLS=false
+NOTIFICATION_REQUEST_TIMEOUT_MS=10000
 
 BARK_SERVER_URL=https://api.day.app
 BARK_DEVICE_KEY=
@@ -214,6 +224,9 @@ WECOM_TO_USER=@all
 - `DATABASE_URL`：SQLite 数据库路径
 - `COOKIE_SECURE`：是否只允许 HTTPS 保存登录 Cookie，普通 HTTP 访问请保持 `false`
 - `DEFAULT_ADMIN_*`：管理员账号和密码，服务启动时会自动同步
+- `ALLOW_PRIVATE_NOTIFICATION_URLS`：是否允许 Bark / 企业微信代理地址指向内网或本机地址，默认 `false`
+- `ALLOW_INSECURE_NOTIFICATION_URLS`：是否允许 Bark / 企业微信代理地址使用 HTTP，生产环境默认建议保持 `false`
+- `NOTIFICATION_REQUEST_TIMEOUT_MS`：通知接口请求超时时间，默认 `10000`
 - `BARK_*` 和 `WECOM_*`：可选的初始通知配置，后续也可在 Web 页面修改
 
 ## Bark 配置说明
@@ -254,6 +267,8 @@ WECOM_TO_USER=@all
 - `/wecom/cgi-bin/message/send`
 
 填写后可以直接点击“测试企业微信推送”。
+
+出于安全考虑，通知外发地址默认只允许 HTTPS 和公网地址。若你明确需要连接内网 Bark 服务或 HTTP 代理，需要在部署环境中把 `ALLOW_PRIVATE_NOTIFICATION_URLS` 或 `ALLOW_INSECURE_NOTIFICATION_URLS` 显式设为 `true`。
 
 ### 企业微信回复确认
 

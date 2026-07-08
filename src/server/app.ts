@@ -14,10 +14,17 @@ import { AuthError } from './services/auth';
 import { NotificationError } from './services/notifications';
 import { ReminderValidationError } from './services/date-calculator';
 import { WecomCallbackError } from './services/wecom-callback';
+import {
+  requireSameOriginUnsafeRequest,
+  securityHeaders
+} from './security';
 
 export const createApp = () => {
   const app = express();
   const distClient = path.resolve(process.cwd(), 'dist/client');
+
+  app.disable('x-powered-by');
+  app.use(securityHeaders);
 
   app.use(
     '/api/wecom/callback',
@@ -29,6 +36,7 @@ export const createApp = () => {
   );
   app.use(express.json({ limit: '1mb' }));
   app.use(cookieParser());
+  app.use(requireSameOriginUnsafeRequest);
 
   app.use((req, _res, next) => {
     const token = req.cookies?.[config.sessionCookieName];
@@ -62,6 +70,13 @@ export const createApp = () => {
       res.sendFile(path.join(distClient, 'index.html'));
     });
   }
+
+  app.use((req, res) => {
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({ error: '接口不存在' });
+    }
+    return res.status(404).type('text/plain').send('Not found');
+  });
 
   app.use(
     (

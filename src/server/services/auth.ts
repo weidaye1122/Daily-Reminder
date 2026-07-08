@@ -48,9 +48,32 @@ const sessionCookieOptions = (): CookieOptions => ({
 
 export const getSessionCookieOptions = sessionCookieOptions;
 
+const unsafeAdminPasswords = new Set([
+  'admin',
+  'admin123456',
+  'change-me-before-start',
+  'changeme',
+  'password',
+  '123456'
+]);
+
+const assertProductionAdminPassword = (password: string) => {
+  if (!config.isProduction) {
+    return;
+  }
+
+  const normalized = password.trim().toLowerCase();
+  if (!config.defaultAdminPasswordConfigured || unsafeAdminPasswords.has(normalized)) {
+    throw new Error(
+      '生产环境必须设置安全的 DEFAULT_ADMIN_PASSWORD，不能留空或使用示例密码。'
+    );
+  }
+};
+
 export const ensureDefaultAdmin = () => {
   const username = config.defaultAdminUsername.trim() || 'admin';
-  const password = config.defaultAdminPassword || 'admin123456';
+  const password = config.defaultAdminPassword || 'change-me-before-start';
+  assertProductionAdminPassword(password);
   const now = formatDateTime(dayjs());
   const users = db
     .prepare(

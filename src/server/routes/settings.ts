@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { getNotificationSettings, getSystemSettings, updateNotificationSettings, updateSystemSettings } from '../services/settings';
+import { getNotificationSettings, getSystemSettings, maskNotificationSettings, updateNotificationSettings, updateSystemSettings } from '../services/settings';
 import { sendTestNotification } from '../services/notifications';
 
 const notificationSchema = z.object({
@@ -34,13 +34,13 @@ const systemSchema = z.object({
 export const settingsRouter = Router();
 
 settingsRouter.get('/notifications', (_req, res) => {
-  res.json(getNotificationSettings());
+  res.json(maskNotificationSettings(getNotificationSettings()));
 });
 
 settingsRouter.put('/notifications', (req, res, next) => {
   try {
     const payload = notificationSchema.parse(req.body);
-    res.json(updateNotificationSettings(payload));
+    res.json(maskNotificationSettings(updateNotificationSettings(payload)));
   } catch (error) {
     next(error);
   }

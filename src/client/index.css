@@ -735,6 +735,14 @@ a {
   border-radius: 50%;
 }
 
+.distribution-dot-solar {
+  background: var(--primary);
+}
+
+.distribution-dot-lunar {
+  background: #14a37f;
+}
+
 .distribution-chart-empty {
   display: grid;
   min-height: 220px;

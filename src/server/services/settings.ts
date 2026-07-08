@@ -34,6 +34,8 @@ interface SystemSettingsRow {
   debug_logging: number;
 }
 
+const maskedSecret = '********';
+
 const mapNotificationSettings = (
   row: NotificationSettingsRow
 ): NotificationSettings => ({
@@ -55,6 +57,18 @@ const mapNotificationSettings = (
   wecomToUser: row.wecom_to_user
 });
 
+const maskSecret = (value: string) => (value ? maskedSecret : '');
+
+export const maskNotificationSettings = (
+  settings: NotificationSettings
+): NotificationSettings => ({
+  ...settings,
+  barkDeviceKey: maskSecret(settings.barkDeviceKey),
+  wecomSecret: maskSecret(settings.wecomSecret),
+  wecomToken: maskSecret(settings.wecomToken),
+  wecomEncodingAesKey: maskSecret(settings.wecomEncodingAesKey)
+});
+
 const mapSystemSettings = (row: SystemSettingsRow): SystemSettings => ({
   timezone: row.timezone,
   defaultAdvanceDays: row.default_advance_days,
@@ -63,6 +77,11 @@ const mapSystemSettings = (row: SystemSettingsRow): SystemSettings => ({
   logRetentionDays: row.log_retention_days,
   debugLogging: Boolean(row.debug_logging)
 });
+
+const resolveSecretUpdate = (nextValue: string, currentValue: string) => {
+  const trimmed = nextValue.trim();
+  return trimmed === maskedSecret ? currentValue : trimmed;
+};
 
 export const getNotificationSettings = () =>
   mapNotificationSettings(
@@ -97,6 +116,7 @@ export const getNotificationSettings = () =>
 
 export const updateNotificationSettings = (input: NotificationSettings) => {
   const now = formatDateTime(dayjs());
+  const current = getNotificationSettings();
   db.prepare(
     `UPDATE notification_settings
      SET bark_enabled = ?,
@@ -124,7 +144,7 @@ export const updateNotificationSettings = (input: NotificationSettings) => {
   ).run(
     input.barkEnabled ? 1 : 0,
     input.barkServerUrl.trim(),
-    input.barkDeviceKey.trim(),
+    resolveSecretUpdate(input.barkDeviceKey, current.barkDeviceKey),
     input.barkDefaultTitle.trim() || '日程提醒助手',
     input.barkSound.trim(),
     input.barkGroup.trim(),
@@ -133,10 +153,10 @@ export const updateNotificationSettings = (input: NotificationSettings) => {
     input.wecomEnabled ? 1 : 0,
     input.wecomCorpId.trim(),
     input.wecomAgentId.trim(),
-    input.wecomSecret.trim(),
+    resolveSecretUpdate(input.wecomSecret, current.wecomSecret),
     input.wecomApiBaseUrl.trim(),
-    input.wecomToken.trim(),
-    input.wecomEncodingAesKey.trim(),
+    resolveSecretUpdate(input.wecomToken, current.wecomToken),
+    resolveSecretUpdate(input.wecomEncodingAesKey, current.wecomEncodingAesKey),
     input.wecomToUser.trim() || '@all',
     now
   );

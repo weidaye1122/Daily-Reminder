@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import { getSessionCookieOptions, login, logout } from '../services/auth';
 import { AuthError } from '../services/auth';
@@ -11,7 +12,16 @@ const loginSchema = z.object({
 
 export const authRouter = Router();
 
-authRouter.post('/login', (req, res, next) => {
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  message: { error: '登录尝试过多，请稍后再试' }
+});
+
+authRouter.post('/login', loginLimiter, (req, res, next) => {
   try {
     const payload = loginSchema.parse(req.body);
     const result = login(payload.username, payload.password);

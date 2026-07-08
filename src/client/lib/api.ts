@@ -16,6 +16,7 @@ const request = async <T>(input: string, init?: RequestInit): Promise<T> => {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      'X-Schedule-Reminder-Request': 'fetch',
       ...(init?.headers ?? {})
     },
     ...init

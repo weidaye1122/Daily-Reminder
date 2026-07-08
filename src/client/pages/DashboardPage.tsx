@@ -188,7 +188,7 @@ export const DashboardPage = () => {
               <div className="distribution-legend">
                 {chartSeries.map((series) => (
                   <span key={series.key}>
-                    <i style={{ background: series.color }} />
+                    <i className={`distribution-dot distribution-dot-${series.key}`} />
                     {series.label} · {distribution.reduce((sum, item) => sum + item[series.key], 0)} 项
                   </span>
                 ))}

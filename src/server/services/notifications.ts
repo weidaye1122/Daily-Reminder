@@ -6,6 +6,8 @@ import type {
 } from '../../shared/types';
 import { buildCompactReminderBody } from './date-calculator';
 import { getNotificationSettings, getRawNotificationSettings, updateCachedWecomToken } from './settings';
+import { config } from '../config';
+import { assertSafeNotificationUrl } from '../security';
 import { dayjs, formatDateTime } from '../utils/time';
 
 export class NotificationError extends Error {
@@ -42,7 +44,13 @@ const getWecomApiBaseUrl = (settings: NotificationSettings) =>
   settings.wecomApiBaseUrl.trim().replace(/\/+$/, '') ||
   'https://qyapi.weixin.qq.com';
 
-const buildWecomUrl = (
+const withNotificationFetchOptions = (init?: RequestInit): RequestInit => ({
+  redirect: 'error',
+  signal: AbortSignal.timeout(config.notificationRequestTimeoutMs),
+  ...init
+});
+
+const buildWecomUrl = async (
   settings: NotificationSettings,
   pathname: string,
   searchParams: Record<string, string>
@@ -60,6 +68,32 @@ const buildWecomUrl = (
   for (const [key, value] of Object.entries(searchParams)) {
     url.searchParams.set(key, value);
   }
+  try {
+    await assertSafeNotificationUrl(url, '企业微信 API 代理地址');
+  } catch (error) {
+    throw new NotificationError(
+      error instanceof Error ? error.message : '企业微信 API 代理地址不安全'
+    );
+  }
+  return url;
+};
+
+const buildBarkUrl = async (settings: NotificationSettings) => {
+  let url: URL;
+  try {
+    url = new URL(`${settings.barkServerUrl.replace(/\/+$/, '')}/push`);
+  } catch {
+    throw new NotificationError(
+      'Bark Server 地址格式不正确，请填写完整的 http:// 或 https:// 地址'
+    );
+  }
+  try {
+    await assertSafeNotificationUrl(url, 'Bark Server 地址');
+  } catch (error) {
+    throw new NotificationError(
+      error instanceof Error ? error.message : 'Bark Server 地址不安全'
+    );
+  }
   return url;
 };
 
@@ -69,9 +103,10 @@ const sendBark = async (
   body: string
 ) => {
   assertBarkConfig(settings);
+  const url = await buildBarkUrl(settings);
   const response = await fetch(
-    `${settings.barkServerUrl.replace(/\/$/, '')}/push`,
-    {
+    url,
+    withNotificationFetchOptions({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -85,7 +120,7 @@ const sendBark = async (
         icon: settings.barkIconUrl || undefined,
         automaticallyCopy: settings.barkAutoCopy ? '1' : undefined
       })
-    }
+    })
   );
   const text = await toJsonText(response);
   if (!response.ok) {
@@ -105,10 +140,11 @@ const resolveWecomToken = async (settings: NotificationSettings) => {
     return raw.wecom_cached_token;
   }
   const response = await fetch(
-    buildWecomUrl(settings, '/cgi-bin/gettoken', {
+    await buildWecomUrl(settings, '/cgi-bin/gettoken', {
       corpid: settings.wecomCorpId,
       corpsecret: settings.wecomSecret
-    })
+    }),
+    withNotificationFetchOptions()
   );
   const payload = (await response.json()) as {
     errcode?: number;
@@ -159,16 +195,16 @@ const sendWecom = async (
         safe: 0
       };
   const response = await fetch(
-    buildWecomUrl(settings, '/cgi-bin/message/send', {
+    await buildWecomUrl(settings, '/cgi-bin/message/send', {
       access_token: token
     }),
-    {
+    withNotificationFetchOptions({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(requestPayload)
-    }
+    })
   );
   const responsePayload = (await response.json()) as { errcode?: number; errmsg?: string };
   if (!response.ok || responsePayload.errcode) {
@@ -187,10 +223,10 @@ export const sendWecomTextToUser = async (
 ) => {
   const token = await resolveWecomToken(settings);
   const response = await fetch(
-    buildWecomUrl(settings, '/cgi-bin/message/send', {
+    await buildWecomUrl(settings, '/cgi-bin/message/send', {
       access_token: token
     }),
-    {
+    withNotificationFetchOptions({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -204,7 +240,7 @@ export const sendWecomTextToUser = async (
         },
         safe: 0
       })
-    }
+    })
   );
   const responsePayload = (await response.json()) as { errcode?: number; errmsg?: string };
   if (!response.ok || responsePayload.errcode) {

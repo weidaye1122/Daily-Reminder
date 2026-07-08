@@ -112,6 +112,8 @@ export const ChannelsPage = () => {
           <label className="field">
             <span>Device Key</span>
             <input
+              type="password"
+              autoComplete="new-password"
               value={form.barkDeviceKey}
               onChange={(event) =>
                 setForm((value) => ({ ...value, barkDeviceKey: event.target.value }))
@@ -209,6 +211,8 @@ export const ChannelsPage = () => {
           <label className="field">
             <span>应用Secret</span>
             <input
+              type="password"
+              autoComplete="new-password"
               value={form.wecomSecret}
               onChange={(event) =>
                 setForm((value) => ({ ...value, wecomSecret: event.target.value }))
@@ -231,6 +235,8 @@ export const ChannelsPage = () => {
           <label className="field">
             <span>Token</span>
             <input
+              type="password"
+              autoComplete="new-password"
               value={form.wecomToken}
               onChange={(event) =>
                 setForm((value) => ({ ...value, wecomToken: event.target.value }))
@@ -240,6 +246,8 @@ export const ChannelsPage = () => {
           <label className="field">
             <span>Encoding_AES</span>
             <input
+              type="password"
+              autoComplete="new-password"
               value={form.wecomEncodingAesKey}
               onChange={(event) =>
                 setForm((value) => ({ ...value, wecomEncodingAesKey: event.target.value }))
