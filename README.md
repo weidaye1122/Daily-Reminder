@@ -59,11 +59,11 @@ pnpm dev
 
 ## Docker 部署
 
-已发布的容器镜像：
+发布配置中的容器镜像标签：
 
 - GitHub Container Registry：`ghcr.io/weidaye1122/schedule-reminder-assistant:latest`
 - Docker Hub：`weidaye1122/schedule-reminder-assistant:latest`
-- 固定版本标签：`0.0.3`
+- 固定版本标签：`1.0.0`
 - 最新版本标签：`latest`
 
 ### 本地 Docker Compose

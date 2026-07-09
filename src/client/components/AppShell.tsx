@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { useAppContext } from '../lib/app-context';
+import { BRAND_VERSION_LABEL } from '../lib/version';
 
 const navItems = [
   { to: '/', label: '仪表盘', end: true },
@@ -42,6 +43,7 @@ export const AppShell = () => {
       <aside className={`sidebar ${mobileMenuOpen ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img className="brand-logo" src="/brand/logo-512.png" alt="日程提醒助手" />
+          <span className="brand-version">{BRAND_VERSION_LABEL}</span>
         </div>
         <nav className="nav-list">
           {navItems.map((item) => (

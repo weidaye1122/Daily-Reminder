@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { api, ApiError } from '../lib/api';
 import { useAppContext } from '../lib/app-context';
 import { Notice } from '../components/Notice';
+import { BRAND_VERSION_LABEL } from '../lib/version';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ export const LoginPage = () => {
       <div className="login-panel">
         <div className="login-copy">
           <img className="login-logo" src="/brand/logo-512.png" alt="日程提醒助手" />
+          <span className="login-version">{BRAND_VERSION_LABEL}</span>
           <h1>
             <span>重要日子</span>
             <span>按你的节奏</span>
